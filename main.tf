@@ -17,21 +17,21 @@ resource "random_integer" "ri" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "TaskBoardBR${random_integer.ri.result}"
-  location = "West Europe"
+  name     = "${var.resource_group_name}${random_integer.ri.result}"
+  location = var.resource_group_location
 }
 
 resource "azurerm_mssql_server" "sqls" {
-  name                         = "taskboardappservbr-${random_integer.ri.result}"
+  name                         = "${var.sql_server_name}${random_integer.ri.result}"
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
-  administrator_login          = "Bobi1"
-  administrator_login_password = "Qwer_1234"
+  administrator_login          = var.sql_administrator_login_username
+  administrator_login_password = var.sql_administrator_login_password
 }
 
 resource "azurerm_mssql_database" "sqldb" {
-  name           = "taskboarddbbr-${random_integer.ri.result}"
+  name           = "${var.sql_database_name}${random_integer.ri.result}"
   server_id      = azurerm_mssql_server.sqls.id
   collation      = "SQL_Latin1_General_CP1_CI_AS"
   license_type   = "LicenseIncluded"
@@ -40,14 +40,14 @@ resource "azurerm_mssql_database" "sqldb" {
 }
 
 resource "azurerm_mssql_firewall_rule" "sqldbfw" {
-  name             = "FirewallRule-${random_integer.ri.result}"
+  name             = "${var.firewall_rule_name}${random_integer.ri.result}"
   server_id        = azurerm_mssql_server.sqls.id
   start_ip_address = "0.0.0.0"
   end_ip_address   = "0.0.0.0"
 }
 
 resource "azurerm_service_plan" "asp" {
-  name                = "taskboard-${random_integer.ri.result}"
+  name                = "${var.app_service_plan_name}${random_integer.ri.result}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
@@ -55,7 +55,7 @@ resource "azurerm_service_plan" "asp" {
 }
 
 resource "azurerm_linux_web_app" "alwa" {
-  name                = "linux-app-${random_integer.ri.result}"
+  name                = "${var.app_service_name}${random_integer.ri.result}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_service_plan.asp.location
   service_plan_id     = azurerm_service_plan.asp.id
@@ -76,7 +76,7 @@ resource "azurerm_linux_web_app" "alwa" {
 
 resource "azurerm_app_service_source_control" "aassc" {
   app_id                 = azurerm_linux_web_app.alwa.id
-  repo_url               = "https://github.com/BorislavRaynov/TaskBoard1.git"
+  repo_url               = var.github_repo
   branch                 = "main"
   use_manual_integration = true
 }
