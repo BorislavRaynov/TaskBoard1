@@ -76,7 +76,7 @@ resource "azurerm_linux_web_app" "alwa" {
 
 resource "azurerm_app_service_source_control" "aassc" {
   app_id                 = azurerm_linux_web_app.alwa.id
-  repo_url               = "https://github.com/BorislavRaynov/03.Azure-Web-App-with-Database-TaskBoard.git"
+  repo_url               = "https://github.com/BorislavRaynov/TaskBoard1.git"
   branch                 = "main"
   use_manual_integration = true
 }
